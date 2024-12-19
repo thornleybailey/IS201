@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matching Game</title>
+    <style>
+        .body{
+            background-color: #000000;
+        }
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(4, 150px); /* 4 columns */
+            grid-template-rows: repeat(4, 150px);    /* 4 rows */
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .card {
+            width: 150px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #c5bcdf;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 20px;
+            text-align: center;
+        }
+        .card:hover{
+background-color: #c5bcdf;
+}
+        .hidden {
+            background-color: #000000;
+        }
+
+        #message {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        /* Restart button style */
+        #restartButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #000000;
+            color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #restartButton:hover {
+            background-color: #c5bcdf;
+        }
+    </style>
+</head>
+<body>
+<div class="body"></div>
+    <h1 style="text-align: center;">Matching Game</h1>
+
+    <div class="game-container" id="gameBoard">
+        <!-- Game cards will be inserted here -->
+    </div>
+
+    <p id="message" style="text-align: center;">Find the matching pairs of letters!</p>
+
+    <!-- Restart Game Button -->
+    <button id="restartButton" onclick="restartGame(event)">Restart Game</button>
+
+    <script>
+        const cards = [
+            { id: 1, value: 'Aladin', matched: false },
+            { id: 2, value: 'Aladin', matched: false },
+            { id: 3, value: 'Hercules', matched: false },
+            { id: 4, value: 'Hercules', matched: false },
+            { id: 5, value: 'The Lion King', matched: false },
+            { id: 6, value: 'The Lion King', matched: false },
+            { id: 7, value: 'Mulan', matched: false },
+            { id: 8, value: 'Mulan', matched: false },
+            { id: 9, value: 'Frozen', matched: false },
+            { id: 10, value: 'Frozen', matched: false },
+            { id: 11, value: 'Cinderella', matched: false },
+            { id: 12, value: 'Cinderella', matched: false },
+            { id: 13, value: 'Toy Story', matched: false },
+            { id: 14, value: 'Toy Story', matched: false },
+            { id: 15, value: 'Jungle Book', matched: false },
+            { id: 16, value: 'Jungle Book', matched: false },
+        ];
+
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        // Shuffle function to randomize cards
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Create and render the game board
+        function renderBoard() {
+            shuffle(cards); // Shuffle cards before displaying
+
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.innerHTML = ''; // Clear previous board
+
+            cards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card', 'hidden');
+                cardElement.setAttribute('data-id', card.id);
+                cardElement.textContent = ''; // Hidden initially
+                cardElement.addEventListener('click', flipCard);
+                gameBoard.appendChild(cardElement);
+            });
+        }
+
+        // Flip card function
+        function flipCard() {
+            const clickedCard = this;
+            const cardId = clickedCard.getAttribute('data-id');
+            const card = cards.find(c => c.id === parseInt(cardId));
+
+            // Prevent flipping if card is already matched or is flipped twice
+            if (flippedCards.length === 2 || clickedCard.classList.contains('matched')) {
+                return;
+            }
+
+            clickedCard.textContent = card.value; // Show value of the card
+            clickedCard.classList.remove('hidden');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                checkMatch();
+            }
+        }
+
+        // Check if two flipped cards match
+        function checkMatch() {
+            const [firstCard, secondCard] = flippedCards;
+            const firstCardElement = document.querySelector(`[data-id="${firstCard.id}"]`);
+            const secondCardElement = document.querySelector(`[data-id="${secondCard.id}"]`);
+
+            if (firstCard.value === secondCard.value) {
+                firstCardElement.classList.add('matched');
+                secondCardElement.classList.add('matched');
+                matchedPairs++;
+                if (matchedPairs === cards.length / 2) {
+                    document.getElementById('message').textContent = 'You win! All pairs matched!';
+                }
+            } else {
+                setTimeout(() => {
+                    firstCardElement.textContent = '';
+                    secondCardElement.textContent = '';
+                    firstCardElement.classList.add('hidden');
+                    secondCardElement.classList.add('hidden');
+                }, 1000);
+            }
+
+            flippedCards = []; // Reset flipped cards
+        }
+
+        // Restart the game
+        function restartGame(event) {
+            event.preventDefault(); // Prevent default button action if any
+
+            // Reset the game state
+            cards.forEach(card => card.matched = false); // Reset matched status
+            flippedCards = [];
+            matchedPairs = 0;
+            document.getElementById('message').textContent = 'Find the matching pairs!'; // Reset the message
+            renderBoard(); // Re-render the board
+        }
+
+        // Initialize the game
+        renderBoard();
+    </script>
+
+</body>
+</html>
